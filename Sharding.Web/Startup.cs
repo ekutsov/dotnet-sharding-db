@@ -4,8 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+
 using Sharding.Core.Configuration;
-using Sharding.BusinessObjects.Settings;
+
+using Sharding.Web.Extensions;
 
 namespace Sharding.Web
 {
@@ -49,6 +51,8 @@ namespace Sharding.Web
             {
                 endpoints.MapControllers();
             });
+
+            app.EnsureShardsMigrationsRun();
         }
     }
 }
