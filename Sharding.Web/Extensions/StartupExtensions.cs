@@ -2,11 +2,13 @@ using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Migrations;
 using Sharding.BusinessObjects.Settings;
+using Sharding.Data.Configuration;
 using Sharding.Data.Context;
-using Sharding.Data.Context.Factory;
 
 namespace Sharding.Web.Extensions
 {
@@ -14,15 +16,13 @@ namespace Sharding.Web.Extensions
     {
         public static void EnsureShardsMigrationsRun(this IApplicationBuilder app)
         {
-            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            var services = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider;
+            var shardSettings = services.GetService<IOptions<List<ShardSettings>>>();
+            foreach (var shard in shardSettings.Value)
             {
-                IShardDbContextFactory shardDbContextFactory = serviceScope.ServiceProvider.GetService<IShardDbContextFactory>();
-                IOptions<List<ShardSettings>> shardSettings = serviceScope.ServiceProvider.GetService<IOptions<List<ShardSettings>>>();
-                foreach (ShardSettings shard in shardSettings.Value)
-                {
-                    ShardDbContext context = shardDbContextFactory.CreateShardDbContext(shard);
-                    context.Database.Migrate();
-                }
+                var builder = new DbContextOptionsBuilder<ShardDbContext>();
+                var context = new ShardDbContext(builder.Options, shard.ConnectionString);
+                context.Database.Migrate();
             }
         }
     }

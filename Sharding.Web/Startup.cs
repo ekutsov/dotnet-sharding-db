@@ -1,12 +1,12 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-
+using Sharding.BusinessObjects.Settings;
 using Sharding.Core.Configuration;
-
 using Sharding.Web.Extensions;
 
 namespace Sharding.Web
@@ -23,14 +23,15 @@ namespace Sharding.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.RegisterDependencies(Configuration);
+            services.Configure<List<ShardSettings>>(Configuration.GetSection("ShardsConnections"));
+            services.RegisterDependecies();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sharding.Web", Version = "v1" });
             });
         }
-
+    
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
