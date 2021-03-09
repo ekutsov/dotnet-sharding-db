@@ -1,31 +1,34 @@
 using System.Reflection;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 using Sharding.BusinessObjects.Models;
-using Sharding.BusinessObjects.Settings;
+using Sharding.Data.Configuration;
+using Sharding.Data.Extensions;
 
 namespace Sharding.Data.Context
 {
     public class ShardDbContext : DbContext
     {
-        private readonly ShardSettings _shard;
-        public ShardDbContext(DbContextOptions<ShardDbContext> options, ShardSettings shard) : base(options)
+        public string ConnectionString { get; }
+        public ShardDbContext(DbContextOptions<ShardDbContext> options, string connectionString) : base(options)
         {
-            _shard = shard;
+            ConnectionString = connectionString;
         }
 
         public DbSet<News> News { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder builder)
         {
-            optionsBuilder.UseNpgsql(_shard.ConnectionString);
-            base.OnConfiguring(optionsBuilder);
+            builder
+                .UseNpgsql(ConnectionString)
+                .ReplaceService<IMigrationsSqlGenerator, ShardMigrationSqlGenerator>();
+            base.OnConfiguring(builder);
         }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            modelBuilder.UseSnakeCaseNames();
             base.OnModelCreating(modelBuilder);
         }
     }

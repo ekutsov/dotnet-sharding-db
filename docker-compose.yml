@@ -1,39 +1,36 @@
 version: '3.8'
 
 services:
-    first_api_root_postgre_db:
-        container_name: first_api_root_postgre_db
+    root_db:
         image: postgres:latest
         environment:
-          - POSTGRES_DB=first_api_root_db
-          - POSTGRES_USER=first_api_root_user
-          - POSTGRES_PASSWORD=first_api_root_password
+          - POSTGRES_DB=root_db
+          - POSTGRES_USER=root_user
+          - POSTGRES_PASSWORD=root_password
         volumes:
           - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
         command: postgres -c listen_addresses='*' -c hba_file=/etc/postgresql/pg_hba.conf
         ports:
           - "5432:5432"
     
-    first_api_postgre_db_shard_one:
-        container_name: first_api_postgre_db_shard_one
+    shard_one_db:
         image: postgres:latest
         environment:
-          - POSTGRES_DB=first_api_shard_one_db
-          - POSTGRES_USER=first_api_shard_one_user
-          - POSTGRES_PASSWORD=first_api_shard_one_password
+          - POSTGRES_DB=shard_one_db
+          - POSTGRES_USER=shard_one_user
+          - POSTGRES_PASSWORD=shard_one_password
         volumes:
           - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
         command: postgres -c listen_addresses='*' -c hba_file=/etc/postgresql/pg_hba.conf -p 6432
         ports:
           - "6432:6432"
 
-    first_api_postgre_db_shard_two:
-        container_name: first_api_postgre_db_shard_two
+    shard_two_db:
         image: postgres:latest
         environment:
-          - POSTGRES_DB=first_api_shard_two_db
-          - POSTGRES_USER=first_api_shard_two_user
-          - POSTGRES_PASSWORD=first_api_shard_two_password
+          - POSTGRES_DB=shard_two_db
+          - POSTGRES_USER=shard_two_user
+          - POSTGRES_PASSWORD=shard_two_password
         volumes:
           - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
         command: postgres -c listen_addresses='*' -c hba_file=/etc/postgresql/pg_hba.conf -p 7432
